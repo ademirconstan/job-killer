@@ -1,0 +1,767 @@
+/* Job Killer Admin Styles - Clean WordPress Integration */
+
+/* General Admin Improvements */
+.job-killer-admin {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.job-killer-admin .wrap {
+    margin-right: 20px;
+    margin-left: 0;
+}
+
+.job-killer-admin h1,
+.job-killer-admin h2,
+.job-killer-admin h3 {
+    color: #1d2327;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 1em;
+}
+
+.job-killer-admin .form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+    vertical-align: top;
+    font-weight: 600;
+    color: #1d2327;
+    text-align: left;
+}
+
+.job-killer-admin .form-table td {
+    padding: 15px 10px;
+    vertical-align: top;
+    line-height: 1.5;
+}
+
+.job-killer-admin .form-table input[type="text"],
+.job-killer-admin .form-table input[type="email"],
+.job-killer-admin .form-table input[type="url"],
+.job-killer-admin .form-table input[type="number"],
+.job-killer-admin .form-table select,
+.job-killer-admin .form-table textarea {
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+}
+
+.job-killer-admin .form-table input:focus,
+.job-killer-admin .form-table select:focus,
+.job-killer-admin .form-table textarea:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: 2px solid transparent;
+}
+
+.job-killer-admin .description {
+    color: #646970;
+    font-size: 13px;
+    font-style: normal;
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+/* Dashboard Improvements */
+.job-killer-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.job-killer-stat-card {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.job-killer-stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.job-killer-stat-number {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2271b1;
+    display: block;
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+.job-killer-stat-label {
+    font-size: 13px;
+    color: #646970;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* Form Improvements */
+.job-killer-form {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.job-killer-form h2,
+.job-killer-form h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #1d2327;
+    border-bottom: 1px solid #f0f0f1;
+    padding-bottom: 10px;
+}
+
+.job-killer-form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.job-killer-form-group {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.job-killer-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #1d2327;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.job-killer-form-group input,
+.job-killer-form-group select,
+.job-killer-form-group textarea {
+    width: 100%;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+.job-killer-form-group input:focus,
+.job-killer-form-group select:focus,
+.job-killer-form-group textarea:focus {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: 2px solid transparent;
+}
+
+/* Button Improvements */
+.job-killer-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    vertical-align: middle;
+    line-height: 1.4;
+}
+
+.job-killer-btn-primary {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+}
+
+.job-killer-btn-primary:hover,
+.job-killer-btn-primary:focus {
+    background: #135e96;
+    border-color: #135e96;
+    color: #fff;
+}
+
+.job-killer-btn-secondary {
+    background: #f6f7f7;
+    border-color: #dcdcde;
+    color: #2c3338;
+}
+
+.job-killer-btn-secondary:hover,
+.job-killer-btn-secondary:focus {
+    background: #f0f0f1;
+    border-color: #8c8f94;
+    color: #2c3338;
+}
+
+.job-killer-btn-danger {
+    background: #d63638;
+    border-color: #d63638;
+    color: #fff;
+}
+
+.job-killer-btn-danger:hover,
+.job-killer-btn-danger:focus {
+    background: #b32d2e;
+    border-color: #b32d2e;
+    color: #fff;
+}
+
+.job-killer-btn-success {
+    background: #00a32a;
+    border-color: #00a32a;
+    color: #fff;
+}
+
+.job-killer-btn-success:hover,
+.job-killer-btn-success:focus {
+    background: #008a20;
+    border-color: #008a20;
+    color: #fff;
+}
+
+.job-killer-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Tables Improvements */
+.job-killer-admin .wp-list-table {
+    border: 1px solid #dcdcde;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    width: 100%;
+    table-layout: auto;
+}
+
+.job-killer-admin .wp-list-table th {
+    background: #f9f9f9;
+    border-bottom: 1px solid #dcdcde;
+    font-weight: 600;
+    color: #1d2327;
+    font-size: 13px;
+    padding: 12px 8px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.job-killer-admin .wp-list-table td {
+    border-bottom: 1px solid #f0f0f1;
+    font-size: 13px;
+    padding: 12px 8px;
+    vertical-align: top;
+    word-wrap: break-word;
+}
+
+.job-killer-admin .wp-list-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.job-killer-admin .wp-list-table .row-actions {
+    color: #646970;
+    font-size: 12px;
+}
+
+.job-killer-admin .wp-list-table .row-actions span {
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.job-killer-admin .wp-list-table .row-actions span:last-child {
+    margin-right: 0;
+}
+
+.job-killer-admin .wp-list-table .row-actions a {
+    color: #2271b1;
+    text-decoration: none;
+}
+
+.job-killer-admin .wp-list-table .row-actions a:hover {
+    color: #135e96;
+}
+
+/* Status Indicators */
+.feed-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.feed-status.active {
+    background: #d1e7dd;
+    color: #0a3622;
+}
+
+.feed-status.inactive {
+    background: #f8d7da;
+    color: #58151c;
+}
+
+/* Log Types */
+.job-killer-log-type {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.job-killer-log-type.info {
+    background: #e7f3ff;
+    color: #0073aa;
+}
+
+.job-killer-log-type.success {
+    background: #d1e7dd;
+    color: #0a3622;
+}
+
+.job-killer-log-type.warning {
+    background: #fcf9e8;
+    color: #646970;
+}
+
+.job-killer-log-type.error {
+    background: #f8d7da;
+    color: #58151c;
+}
+
+/* Modal Improvements */
+.job-killer-modal {
+    position: fixed;
+    z-index: 100000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.job-killer-modal-content {
+    background-color: #fff;
+    margin: 0;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.job-killer-modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #dcdcde;
+    background: #f9f9f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px 8px 0 0;
+}
+
+.job-killer-modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.job-killer-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #646970;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.job-killer-modal-close:hover {
+    color: #d63638;
+    background: rgba(214, 54, 56, 0.1);
+}
+
+.job-killer-modal-body {
+    padding: 24px;
+}
+
+.job-killer-modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #dcdcde;
+    background: #f9f9f9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Provider Fields Improvements */
+.provider-auth-fields,
+.provider-parameter-fields {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #dcdcde;
+}
+
+.provider-auth-fields h3,
+.provider-parameter-fields h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+/* Parameter Items Improvements */
+.parameter-item {
+    display: inline-block;
+    background: #f6f7f7;
+    color: #2c3338;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-right: 8px;
+    margin-bottom: 4px;
+    border: 1px solid #dcdcde;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.feed-parameters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    max-width: 300px;
+}
+
+/* Notice Improvements */
+.job-killer-admin .notice {
+    border-left-width: 4px;
+    border-left-style: solid;
+    margin: 15px 0;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+}
+
+.job-killer-admin .notice.notice-success {
+    border-left-color: #00a32a;
+    background: #f0f6fc;
+}
+
+.job-killer-admin .notice.notice-error {
+    border-left-color: #d63638;
+    background: #fcf0f1;
+}
+
+.job-killer-admin .notice.notice-warning {
+    border-left-color: #dba617;
+    background: #fcf9e8;
+}
+
+.job-killer-admin .notice.notice-info {
+    border-left-color: #72aee6;
+    background: #f0f6fc;
+}
+
+/* Loading States Improvements */
+.job-killer-loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f0f0f1;
+    border-top: 2px solid #2271b1;
+    border-radius: 50%;
+    animation: job-killer-spin 1s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+@keyframes job-killer-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Chart Container Improvements */
+.job-killer-chart-container {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.job-killer-chart-container h3 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+/* System Info Improvements */
+.job-killer-system-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #dcdcde;
+}
+
+.job-killer-system-info-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f1;
+    font-size: 13px;
+}
+
+.job-killer-system-info-table td:first-child {
+    background: #f9f9f9;
+    font-weight: 500;
+    width: 220px;
+    color: #1d2327;
+}
+
+/* Status Indicators Improvements */
+.job-killer-status-ok {
+    color: #00a32a;
+    font-weight: 600;
+}
+
+.job-killer-status-warning {
+    color: #dba617;
+    font-weight: 600;
+}
+
+.job-killer-status-error {
+    color: #d63638;
+    font-weight: 600;
+}
+
+/* Header Improvements */
+.job-killer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #dcdcde;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.job-killer-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1d2327;
+    flex: 1;
+    min-width: 200px;
+}
+
+.job-killer-header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Responsive Design */
+@media (max-width: 782px) {
+    .job-killer-stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .job-killer-stat-number {
+        font-size: 24px;
+    }
+    
+    .job-killer-form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .job-killer-modal-content {
+        width: 95%;
+        margin: 0;
+        max-height: 95vh;
+    }
+    
+    .job-killer-modal-header,
+    .job-killer-modal-body,
+    .job-killer-modal-footer {
+        padding: 16px;
+    }
+    
+    .job-killer-modal-footer {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .job-killer-modal-footer .job-killer-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .job-killer-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .job-killer-header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .parameter-item {
+        display: block;
+        margin-bottom: 8px;
+        margin-right: 0;
+    }
+    
+    .feed-parameters {
+        flex-direction: column;
+        align-items: flex-start;
+        max-width: none;
+    }
+    
+    .job-killer-form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .job-killer-form-group {
+        min-width: auto;
+    }
+    
+    .job-killer-admin .wp-list-table {
+        font-size: 12px;
+    }
+    
+    .job-killer-admin .wp-list-table th,
+    .job-killer-admin .wp-list-table td {
+        padding: 8px 6px;
+    }
+    
+    .job-killer-admin .form-table input[type="text"],
+    .job-killer-admin .form-table input[type="email"],
+    .job-killer-admin .form-table input[type="url"],
+    .job-killer-admin .form-table input[type="number"],
+    .job-killer-admin .form-table select,
+    .job-killer-admin .form-table textarea {
+        max-width: none;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .job-killer-modal,
+    .job-killer-btn,
+    .row-actions {
+        display: none !important;
+    }
+    
+    .job-killer-admin .wp-list-table {
+        border: 1px solid #000;
+    }
+    
+    .job-killer-admin .wp-list-table th,
+    .job-killer-admin .wp-list-table td {
+        border: 1px solid #000;
+    }
+}
+
+/* Accessibility Improvements */
+.job-killer-btn:focus,
+.job-killer-admin input:focus,
+.job-killer-admin select:focus,
+.job-killer-admin textarea:focus {
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: 2px solid transparent;
+    outline-offset: 0;
+}
+
+.job-killer-modal-close:focus {
+    outline: 2px solid #2271b1;
+    outline-offset: 2px;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .job-killer-stat-card {
+        border-width: 2px;
+    }
+    
+    .feed-status {
+        border: 1px solid currentColor;
+    }
+    
+    .job-killer-log-type {
+        border: 1px solid currentColor;
+    }
+    
+    .job-killer-btn {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .job-killer-stat-card,
+    .job-killer-modal-close,
+    .job-killer-btn,
+    .job-killer-form-group input,
+    .job-killer-form-group select,
+    .job-killer-form-group textarea {
+        transition: none;
+    }
+    
+    .job-killer-loading {
+        animation: none;
+    }
+    
+    .job-killer-stat-card:hover {
+        transform: none;
+    }
+}

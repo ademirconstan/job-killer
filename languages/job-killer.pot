@@ -1,0 +1,358 @@
+# Job Killer WordPress Plugin
+# Copyright (C) 2024 Job Killer Team
+# This file is distributed under the same license as the Job Killer package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Job Killer 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/jobkiller/job-killer\n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: job-killer.php:45
+msgid "Job Killer requires PHP 8.1 or higher. You are running PHP %s."
+msgstr ""
+
+#: job-killer.php:55
+msgid "Job Killer requires WordPress 6.8 or higher. You are running WordPress %s."
+msgstr ""
+
+#: job-killer.php:66
+msgid "Job Killer requires the %s PHP extension to be installed."
+msgstr ""
+
+#: includes/class-job-killer-core.php:45
+msgid "Job Listings"
+msgstr ""
+
+#: includes/class-job-killer-core.php:46
+msgid "Job Listing"
+msgstr ""
+
+#: includes/class-job-killer-core.php:47
+msgid "Jobs"
+msgstr ""
+
+#: includes/class-job-killer-core.php:48
+msgid "Add New"
+msgstr ""
+
+#: includes/class-job-killer-core.php:49
+msgid "Add New Job Listing"
+msgstr ""
+
+#: includes/class-job-killer-core.php:50
+msgid "Edit Job Listing"
+msgstr ""
+
+#: includes/class-job-killer-core.php:51
+msgid "New Job Listing"
+msgstr ""
+
+#: includes/class-job-killer-core.php:52
+msgid "View Job Listing"
+msgstr ""
+
+#: includes/class-job-killer-core.php:53
+msgid "Search Job Listings"
+msgstr ""
+
+#: includes/class-job-killer-core.php:54
+msgid "No job listings found"
+msgstr ""
+
+#: includes/class-job-killer-core.php:55
+msgid "No job listings found in trash"
+msgstr ""
+
+#: includes/class-job-killer-core.php:78
+msgid "Job Categories"
+msgstr ""
+
+#: includes/class-job-killer-core.php:79
+msgid "Job Category"
+msgstr ""
+
+#: includes/class-job-killer-core.php:80
+msgid "Search Job Categories"
+msgstr ""
+
+#: includes/class-job-killer-core.php:81
+msgid "All Job Categories"
+msgstr ""
+
+#: includes/class-job-killer-core.php:82
+msgid "Parent Job Category"
+msgstr ""
+
+#: includes/class-job-killer-core.php:83
+msgid "Parent Job Category:"
+msgstr ""
+
+#: includes/class-job-killer-core.php:84
+msgid "Edit Job Category"
+msgstr ""
+
+#: includes/class-job-killer-core.php:85
+msgid "Update Job Category"
+msgstr ""
+
+#: includes/class-job-killer-core.php:86
+msgid "Add New Job Category"
+msgstr ""
+
+#: includes/class-job-killer-core.php:87
+msgid "New Job Category Name"
+msgstr ""
+
+#: includes/class-job-killer-core.php:88
+msgid "Categories"
+msgstr ""
+
+#: includes/class-job-killer-core.php:100
+msgid "Job Types"
+msgstr ""
+
+#: includes/class-job-killer-core.php:101
+msgid "Job Type"
+msgstr ""
+
+#: includes/class-job-killer-core.php:102
+msgid "Search Job Types"
+msgstr ""
+
+#: includes/class-job-killer-core.php:103
+msgid "All Job Types"
+msgstr ""
+
+#: includes/class-job-killer-core.php:104
+msgid "Edit Job Type"
+msgstr ""
+
+#: includes/class-job-killer-core.php:105
+msgid "Update Job Type"
+msgstr ""
+
+#: includes/class-job-killer-core.php:106
+msgid "Add New Job Type"
+msgstr ""
+
+#: includes/class-job-killer-core.php:107
+msgid "New Job Type Name"
+msgstr ""
+
+#: includes/class-job-killer-core.php:108
+msgid "Types"
+msgstr ""
+
+#: includes/class-job-killer-core.php:120
+msgid "Job Regions"
+msgstr ""
+
+#: includes/class-job-killer-core.php:121
+msgid "Job Region"
+msgstr ""
+
+#: includes/class-job-killer-core.php:122
+msgid "Search Job Regions"
+msgstr ""
+
+#: includes/class-job-killer-core.php:123
+msgid "All Job Regions"
+msgstr ""
+
+#: includes/class-job-killer-core.php:124
+msgid "Edit Job Region"
+msgstr ""
+
+#: includes/class-job-killer-core.php:125
+msgid "Update Job Region"
+msgstr ""
+
+#: includes/class-job-killer-core.php:126
+msgid "Add New Job Region"
+msgstr ""
+
+#: includes/class-job-killer-core.php:127
+msgid "New Job Region Name"
+msgstr ""
+
+#: includes/class-job-killer-core.php:128
+msgid "Regions"
+msgstr ""
+
+#: includes/class-job-killer-core.php:150
+msgid "Every 30 Minutes"
+msgstr ""
+
+#: includes/class-job-killer-core.php:155
+msgid "Every 2 Hours"
+msgstr ""
+
+#: includes/class-job-killer-core.php:160
+msgid "Every 6 Hours"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:45
+msgid "Search jobs..."
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:47
+msgid "Location"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:49
+msgid "Search"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:85
+msgid "Active Jobs"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:92
+msgid "Jobs Today"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:99
+msgid "Jobs This Week"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:106
+msgid "Companies"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:130
+msgid "No recent jobs found."
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:200
+msgid "No jobs found."
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:240
+msgid "Featured"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:244
+msgid "Remote"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:290
+msgid "All Categories"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:300
+msgid "All Types"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:310
+msgid "All Regions"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:318
+msgid "Remote Only"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:330
+msgid "All Categories"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:350
+msgid "&laquo; Previous"
+msgstr ""
+
+#: includes/class-job-killer-frontend.php:351
+msgid "Next &raquo;"
+msgstr ""
+
+#: includes/class-job-killer-helper.php:150
+msgid "just now"
+msgstr ""
+
+#: includes/class-job-killer-helper.php:155
+msgid "year"
+msgstr ""
+
+#: includes/class-job-killer-helper.php:156
+msgid "month"
+msgstr ""
+
+#: includes/class-job-killer-helper.php:157
+msgid "day"
+msgstr ""
+
+#: includes/class-job-killer-helper.php:158
+msgid "hour"
+msgstr ""
+
+#: includes/class-job-killer-helper.php:159
+msgid "minute"
+msgstr ""
+
+#: includes/class-job-killer-helper.php:165
+msgid "%d %s ago"
+msgid_plural "%d %ss ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-job-killer-helper.php:173
+msgid "just now"
+msgstr ""
+
+#: includes/class-job-killer-helper.php:200
+msgid "Feed URL is required"
+msgstr ""
+
+#: includes/class-job-killer-helper.php:205
+msgid "Invalid URL format"
+msgstr ""
+
+#: includes/class-job-killer-helper.php:215
+msgid "Feed URL is not accessible: %s"
+msgstr ""
+
+#: includes/class-job-killer-helper.php:222
+msgid "Feed URL returned HTTP status %d"
+msgstr ""
+
+#: includes/admin/class-job-killer-admin.php:45
+msgid "Job Killer"
+msgstr ""
+
+#: includes/admin/class-job-killer-admin.php:55
+msgid "Dashboard"
+msgstr ""
+
+#: includes/admin/class-job-killer-admin.php:65
+msgid "Settings"
+msgstr ""
+
+#: includes/admin/class-job-killer-admin.php:75
+msgid "RSS Feeds"
+msgstr ""
+
+#: includes/admin/class-job-killer-admin.php:85
+msgid "API Testing"
+msgstr ""
+
+#: includes/admin/class-job-killer-admin.php:95
+msgid "Scheduling"
+msgstr ""
+
+#: includes/admin/class-job-killer-admin.php:105
+msgid "Logs"
+msgstr ""
+
+#: includes/admin/class-job-killer-admin.php:155
+msgid "Settings"
+msgstr ""
+
+#: includes/admin/class-job-killer-admin.php:156
+msgid "RSS Feeds"
+msgstr ""
