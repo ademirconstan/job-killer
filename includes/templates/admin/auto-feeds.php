@@ -70,7 +70,12 @@ if (!defined('ABSPATH')) {
                     <td>
                         <?php
                         if (!empty($feed['last_import'])) {
-                            $helper = new Job_Killer_Helper();
+                            if (!isset($helper) || !$helper) {
+                                if (!class_exists('JK_Helper')) {
+                                    require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-jk-helper.php';
+                                }
+                                $helper = new JK_Helper();
+                            }
                             echo $helper->time_ago($feed['last_import']);
                         } else {
                             echo '<em>' . __('Nunca', 'job-killer') . '</em>';

@@ -35,13 +35,31 @@ class Job_Killer_Admin {
     public $setup;
     
     /**
+     * Helper instance
+     */
+    protected $helper;
+    
+    /**
      * Constructor
      */
     public function __construct() {
+        // Load helper first
+        $this->load_helper();
+        
         $this->init_hooks();
         
         // Load components after admin_init to ensure all dependencies are available
         add_action('admin_init', array($this, 'load_components'), 5);
+    }
+    
+    /**
+     * Load helper instance
+     */
+    private function load_helper() {
+        if (!class_exists('JK_Helper')) {
+            require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-jk-helper.php';
+        }
+        $this->helper = new JK_Helper();
     }
     
     /**
@@ -282,19 +300,16 @@ class Job_Killer_Admin {
      * Dashboard page
      */
     public function dashboard_page() {
-        // Initialize helper if not available
-        if (!$this->helper && class_exists('Job_Killer_Helper')) {
-            $this->helper = new Job_Killer_Helper();
-        }
+        $helper = $this->helper; // Make available to template
         
         $stats = array();
         $chart_data = array();
         $recent_logs = array();
         
-        if ($this->helper) {
-            $stats = $this->helper->get_import_stats();
-            $chart_data = $this->helper->get_chart_data(30);
-            $recent_logs = $this->helper->get_logs(array('limit' => 10));
+        if ($helper) {
+            $stats = $helper->get_import_stats();
+            $chart_data = $helper->get_chart_data(30);
+            $recent_logs = $helper->get_logs(array('limit' => 10));
         }
         
         // Get next scheduled import
@@ -370,6 +385,8 @@ class Job_Killer_Admin {
      * Scheduling page
      */
     public function scheduling_page() {
+        $helper = $this->helper; // Make available to template
+        
         $settings = get_option('job_killer_settings', array());
         $next_import = wp_next_scheduled('job_killer_import_jobs');
         $next_cleanup = wp_next_scheduled('job_killer_cleanup_logs');
@@ -377,12 +394,8 @@ class Job_Killer_Admin {
         // Get cron history
         $cron_logs = array();
         
-        if (!$this->helper && class_exists('Job_Killer_Helper')) {
-            $this->helper = new Job_Killer_Helper();
-        }
-        
-        if ($this->helper) {
-            $cron_logs = $this->helper->get_logs(array(
+        if ($helper) {
+            $cron_logs = $helper->get_logs(array(
                 'source' => 'cron',
                 'limit' => 20
             ));
@@ -395,11 +408,9 @@ class Job_Killer_Admin {
      * Logs page
      */
     public function logs_page() {
-        if (!$this->helper && class_exists('Job_Killer_Helper')) {
-            $this->helper = new Job_Killer_Helper();
-        }
+        $helper = $this->helper; // Make available to template
         
-        if (!$this->helper) {
+        if (!$helper) {
             echo '<div class="notice notice-error"><p>' . __('Helper component not available.', 'job-killer') . '</p></div>';
             return;
         }
@@ -414,8 +425,8 @@ class Job_Killer_Admin {
             'offset' => (max(1, intval($_GET['paged'] ?? 1)) - 1) * 50
         );
         
-        $logs = $this->helper->get_logs($filters);
-        $total_logs = $this->helper->get_log_count($filters);
+        $logs = $helper->get_logs($filters);
+        $total_logs = $helper->get_log_count($filters);
         $total_pages = ceil($total_logs / 50);
         $current_page = max(1, intval($_GET['paged'] ?? 1));
         

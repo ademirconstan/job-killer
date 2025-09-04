@@ -27,6 +27,10 @@ if (!defined('ABSPATH')) {
                     <input type="url" id="rss_test_url" name="rss_url" placeholder="https://example.com/jobs.rss" required>
                 </div>
                 <div class="job-killer-form-group">
+                    <label for="publisher_id"><?php _e('Publisher ID (for WhatJobs)', 'job-killer'); ?></label>
+                    <input type="text" id="publisher_id" name="publisher_id" placeholder="<?php esc_attr_e('Required for WhatJobs API', 'job-killer'); ?>">
+                </div>
+                <div class="job-killer-form-group">
                     <label>&nbsp;</label>
                     <button type="submit" class="job-killer-btn job-killer-btn-primary">
                         <?php _e('Test RSS Feed', 'job-killer'); ?>
@@ -297,18 +301,26 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         
         var url = $('#rss_test_url').val();
+        var publisherId = $('#publisher_id').val();
         if (!url) return;
         
         $('#rss-test-results').html('<p>Testing RSS feed...</p>').show();
         
+        var requestData = {
+            action: 'job_killer_test_feed',
+            nonce: jobKillerAdmin.nonce,
+            url: url
+        };
+        
+        // Add publisher ID if provided (for WhatJobs)
+        if (publisherId) {
+            requestData.publisher_id = publisherId;
+        }
+        
         $.ajax({
             url: jobKillerAdmin.ajaxUrl,
             type: 'POST',
-            data: {
-                action: 'job_killer_test_feed',
-                nonce: jobKillerAdmin.nonce,
-                url: url
-            },
+            data: requestData,
             success: function(response) {
                 if (response.success) {
                     var html = '<div class="job-killer-notice success">';

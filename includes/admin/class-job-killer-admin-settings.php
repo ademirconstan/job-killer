@@ -174,6 +174,22 @@ class Job_Killer_Admin_Settings {
                         'default' => true
                     )
                 )
+            ),
+            'import_behavior' => array(
+                'title' => __('Import Behavior', 'job-killer'),
+                'description' => __('Configure how imported jobs are handled.', 'job-killer'),
+                'fields' => array(
+                    'default_post_status' => array(
+                        'title' => __('Default Post Status', 'job-killer'),
+                        'type' => 'select',
+                        'description' => __('Status for newly imported jobs.', 'job-killer'),
+                        'default' => 'draft',
+                        'options' => array(
+                            'draft' => __('Draft (Review before publishing)', 'job-killer'),
+                            'publish' => __('Published (Live immediately)', 'job-killer')
+                        )
+                    )
+                )
             )
         );
     }
@@ -330,6 +346,11 @@ class Job_Killer_Admin_Settings {
             
             // Schedule with new interval
             wp_schedule_event(time(), $sanitized['cron_interval'], 'job_killer_import_jobs');
+        }
+        
+        // Update default post status option
+        if (isset($sanitized['default_post_status'])) {
+            update_option('jk_default_post_status', $sanitized['default_post_status']);
         }
         
         return $sanitized;

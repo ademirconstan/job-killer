@@ -8,6 +8,14 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+// Ensure helper is available
+if (!isset($helper) || !$helper) {
+    if (!class_exists('JK_Helper')) {
+        require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-jk-helper.php';
+    }
+    $helper = new JK_Helper();
+}
 ?>
 
 <div class="wrap job-killer-admin">

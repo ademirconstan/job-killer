@@ -125,9 +125,14 @@ final class Job_Killer {
      */
     private function load_required_files() {
         // Core files
-        require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-helper.php';
+        require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-jk-helper.php';
         require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-cache.php';
         require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-core.php';
+        
+        // Import system
+        require_once JOB_KILLER_PLUGIN_DIR . 'includes/import/providers-registry.php';
+        require_once JOB_KILLER_PLUGIN_DIR . 'includes/import/class-jk-feeds-store.php';
+        require_once JOB_KILLER_PLUGIN_DIR . 'includes/import/class-jk-importer.php';
         
         // Admin files (only in admin)
         if (is_admin()) {
@@ -138,16 +143,16 @@ final class Job_Killer {
             require_once JOB_KILLER_PLUGIN_DIR . 'includes/admin/class-job-killer-admin-auto-feeds.php';
         }
         
-        // Import files
-        require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-importer.php';
-        require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-rss-providers.php';
-        require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-providers-manager.php';
-        
         // Frontend files
         require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-frontend.php';
         require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-shortcodes.php';
         require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-widgets.php';
         require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-structured-data.php';
+        
+        // Legacy files for compatibility
+        require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-importer.php';
+        require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-rss-providers.php';
+        require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-providers-manager.php';
         
         // Optional files
         if (file_exists(JOB_KILLER_PLUGIN_DIR . 'includes/class-job-killer-api.php')) {
@@ -168,6 +173,9 @@ final class Job_Killer {
             return;
         }
         
+        // Register custom post type for feeds
+        $this->register_feed_post_type();
+        
         // Initialize core (this will register post types and taxonomies)
         if (class_exists('Job_Killer_Core')) {
             $this->core = new Job_Killer_Core();
@@ -175,6 +183,23 @@ final class Job_Killer {
         }
         
         do_action('job_killer_initialized');
+    }
+    
+    /**
+     * Register feed post type
+     */
+    private function register_feed_post_type() {
+        register_post_type('jk_feed', array(
+            'labels' => array(
+                'name' => __('Job Feeds', 'job-killer'),
+                'singular_name' => __('Job Feed', 'job-killer')
+            ),
+            'public' => false,
+            'show_ui' => false,
+            'show_in_menu' => false,
+            'capability_type' => 'post',
+            'supports' => array('title')
+        ));
     }
     
     /**
@@ -354,10 +379,12 @@ final class Job_Killer {
             'log_retention_days' => 30,
             'email_notifications' => true,
             'notification_email' => get_option('admin_email'),
-            'structured_data' => true
+            'structured_data' => true,
+            'default_post_status' => 'draft'
         );
         
         add_option('job_killer_settings', $default_settings);
+        add_option('jk_default_post_status', 'draft');
         add_option('job_killer_feeds', array());
         add_option('job_killer_auto_feeds', array());
         add_option('job_killer_version', JOB_KILLER_VERSION);

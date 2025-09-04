@@ -71,47 +71,78 @@ class Job_Killer_Admin_Ajax {
             wp_send_json_error(__('Feed URL is required', 'job-killer'));
         }
         
-        // Initialize helper if needed
-        if (!class_exists('Job_Killer_Helper')) {
-            wp_send_json_error(__('Helper class not available', 'job-killer'));
+        // Load providers registry
+        if (!class_exists('JK_Providers_Registry')) {
+            require_once JOB_KILLER_PLUGIN_DIR . 'includes/import/providers-registry.php';
         }
         
-        $helper = new Job_Killer_Helper();
-        $validation = $helper->validate_feed_url($url);
-        
-        if (is_wp_error($validation)) {
-            wp_send_json_error($validation->get_error_message());
-        }
-        
-        // Test feed parsing
-        if (!class_exists('Job_Killer_Importer') || !class_exists('Job_Killer_Rss_Providers')) {
-            wp_send_json_error(__('Required classes not available', 'job-killer'));
-        }
-        
-        $importer = new Job_Killer_Importer();
-        $rss_providers = new Job_Killer_Rss_Providers();
-        
-        $provider_id = $rss_providers->detect_provider($url);
-        $provider_config = $rss_providers->get_provider_config($provider_id);
-        
-        $feed_config = array(
-            'url' => $url,
-            'field_mapping' => $provider_config['field_mapping'],
-            'name' => 'Test Feed'
-        );
-        
-        $result = $importer->test_feed_import($feed_config);
-        
-        if ($result['success']) {
-            wp_send_json_success(array(
-                'message' => sprintf(__('Feed test successful! Found %d jobs.', 'job-killer'), $result['jobs_found']),
-                'jobs_found' => $result['jobs_found'],
-                'sample_jobs' => $result['sample_jobs'],
-                'provider' => $provider_id,
-                'provider_name' => $provider_config['name']
+        try {
+            // Detect provider
+            $provider_id = jk_get_provider_from_url($url);
+            $provider_info = JK_Providers_Registry::get_provider_info($provider_id);
+            
+            if (!$provider_info) {
+                wp_send_json_error(__('Unsupported feed provider', 'job-killer'));
+            }
+            
+            // Test based on provider type
+            if ($provider_id === 'whatjobs') {
+                // For WhatJobs, we need publisher ID
+                $publisher_id = $_POST['publisher_id'] ?? '';
+                if (empty($publisher_id)) {
+                    wp_send_json_error(__('Publisher ID is required for WhatJobs API', 'job-killer'));
+                }
+                
+                $config = array(
+                    'auth' => array('publisher_id' => $publisher_id),
+                    'parameters' => array('only_today' => true)
+                );
+                
+                $result = JK_Providers_Registry::test_provider($provider_id, $config);
+            } else {
+                // For RSS feeds, test directly
+                if (!class_exists('JK_Provider_Generic_RSS')) {
+                    require_once JOB_KILLER_PLUGIN_DIR . 'includes/import/providers/class-jk-provider-generic-rss.php';
+                }
+                
+                $jobs = JK_Provider_Generic_RSS::fetch($url);
+                
+                if (is_wp_error($jobs)) {
+                    $result = array(
+                        'success' => false,
+                        'message' => $jobs->get_error_message()
+                    );
+                } else {
+                    $result = array(
+                        'success' => true,
+                        'message' => sprintf(__('Feed test successful! Found %d jobs.', 'job-killer'), count($jobs)),
+                        'jobs_found' => count($jobs),
+                        'sample_jobs' => array_slice($jobs, 0, 3)
+                    );
+                }
+            }
+            
+            if (is_wp_error($result)) {
+                wp_send_json_error($result->get_error_message());
+            } elseif ($result['success']) {
+                wp_send_json_success(array(
+                    'message' => $result['message'],
+                    'jobs_found' => $result['jobs_found'],
+                    'sample_jobs' => $result['sample_jobs'] ?? array(),
+                    'provider' => $provider_id,
+                    'provider_name' => $provider_info['name'],
+                    'api_url' => $result['api_url'] ?? null
+                ));
+            } else {
+                wp_send_json_error($result['message']);
+            }
+            
+        } catch (Exception $e) {
+            jk_log('test_feed_error', array(
+                'url' => $url,
+                'error' => $e->getMessage()
             ));
-        } else {
-            wp_send_json_error($result['error']);
+            wp_send_json_error($e->getMessage());
         }
     }
     
@@ -125,43 +156,65 @@ class Job_Killer_Admin_Ajax {
             wp_send_json_error(__('Insufficient permissions', 'job-killer'));
         }
         
+        // Handle both old and new format
         $feed_data = $_POST['feed'] ?? array();
+        
+        // Support direct POST fields for compatibility
+        if (empty($feed_data['name']) && !empty($_POST['jk_feed_name'])) {
+            $feed_data['name'] = $_POST['jk_feed_name'];
+        }
+        
+        if (empty($feed_data['url']) && !empty($_POST['jk_feed_url'])) {
+            $feed_data['url'] = $_POST['jk_feed_url'];
+        }
         
         if (empty($feed_data['name']) || empty($feed_data['url'])) {
             wp_send_json_error(__('Feed name and URL are required', 'job-killer'));
         }
         
-        if (!class_exists('Job_Killer_Helper')) {
-            wp_send_json_error(__('Helper class not available', 'job-killer'));
+        // Load feeds store
+        if (!class_exists('JK_Feeds_Store')) {
+            require_once JOB_KILLER_PLUGIN_DIR . 'includes/import/class-jk-feeds-store.php';
         }
         
-        $helper = new Job_Killer_Helper();
-        $feed_config = $helper->sanitize_feed_config($feed_data);
-        
-        // Validate URL
-        $validation = $helper->validate_feed_url($feed_config['url']);
-        if (is_wp_error($validation)) {
-            wp_send_json_error($validation->get_error_message());
+        // Detect provider
+        if (!class_exists('JK_Providers_Registry')) {
+            require_once JOB_KILLER_PLUGIN_DIR . 'includes/import/providers-registry.php';
         }
         
-        // Generate ID if not provided
-        if (empty($feed_config['id'])) {
-            $feed_config['id'] = sanitize_key($feed_config['name']) . '_' . time();
-        }
+        $provider_id = jk_get_provider_from_url($feed_data['url']);
         
-        // Save feed
-        $feeds = get_option('job_killer_feeds', array());
-        $feeds[$feed_config['id']] = $feed_config;
-        update_option('job_killer_feeds', $feeds);
-        
-        $helper->log('info', 'admin', 
-            sprintf('Feed "%s" saved successfully', $feed_config['name']),
-            array('feed_id' => $feed_config['id'])
+        // Prepare feed data
+        $sanitized_data = array(
+            'name' => sanitize_text_field($feed_data['name']),
+            'url' => esc_url_raw($feed_data['url']),
+            'provider' => $provider_id,
+            'active' => !empty($feed_data['active']),
+            'args' => array(
+                'default_category' => sanitize_text_field($feed_data['default_category'] ?? ''),
+                'default_region' => sanitize_text_field($feed_data['default_region'] ?? '')
+            ),
+            'auth' => array()
         );
+        
+        // Handle WhatJobs auth
+        if ($provider_id === 'whatjobs' && !empty($feed_data['auth'])) {
+            $sanitized_data['auth'] = array(
+                'publisher_id' => sanitize_text_field($feed_data['auth']['publisher_id'] ?? '')
+            );
+        }
+        
+        // Save feed using new store
+        $feed_id = JK_Feeds_Store::insert($sanitized_data);
+        
+        if (is_wp_error($feed_id)) {
+            wp_send_json_error($feed_id->get_error_message());
+        }
         
         wp_send_json_success(array(
             'message' => __('Feed saved successfully!', 'job-killer'),
-            'feed' => $feed_config
+            'feed_id' => $feed_id,
+            'feed' => $sanitized_data
         ));
     }
     
@@ -259,16 +312,25 @@ class Job_Killer_Admin_Ajax {
             wp_send_json_error(__('Feed ID is required', 'job-killer'));
         }
         
-        $feeds = get_option('job_killer_feeds', array());
+        // Load feeds store
+        if (!class_exists('JK_Feeds_Store')) {
+            require_once JOB_KILLER_PLUGIN_DIR . 'includes/import/class-jk-feeds-store.php';
+        }
         
-        if (!isset($feeds[$feed_id])) {
+        $feed_config = JK_Feeds_Store::get($feed_id);
+        
+        if (!$feed_config) {
             wp_send_json_error(__('Feed not found', 'job-killer'));
         }
         
-        $importer = new Job_Killer_Importer();
+        // Load importer
+        if (!class_exists('JK_Importer')) {
+            require_once JOB_KILLER_PLUGIN_DIR . 'includes/import/class-jk-importer.php';
+        }
         
         try {
-            $imported = $importer->import_from_feed($feed_id, $feeds[$feed_id]);
+            $importer = new JK_Importer();
+            $imported = $importer->import_from_feed($feed_id, $feed_config);
             
             wp_send_json_success(array(
                 'message' => sprintf(__('Successfully imported %d jobs!', 'job-killer'), $imported),
@@ -276,6 +338,10 @@ class Job_Killer_Admin_Ajax {
             ));
             
         } catch (Exception $e) {
+            jk_log('import_feed_error', array(
+                'feed_id' => $feed_id,
+                'error' => $e->getMessage()
+            ));
             wp_send_json_error($e->getMessage());
         }
     }
