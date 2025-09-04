@@ -122,6 +122,81 @@ class JK_Providers_Registry {
         
         return new $provider_info['class']();
     }
+    
+    /**
+     * Test provider connection
+     */
+    public static function test_provider($provider_id, $config) {
+        $provider_info = self::get_provider_info($provider_id);
+        
+        if (!$provider_info) {
+            return new WP_Error('invalid_provider', __('Invalid provider', 'job-killer'));
+        }
+        
+        if (!class_exists($provider_info['class'])) {
+            return new WP_Error('provider_class_missing', sprintf(__('Provider class %s not found', 'job-killer'), $provider_info['class']));
+        }
+        
+        $provider_class = $provider_info['class'];
+        
+        try {
+            if ($provider_id === 'whatjobs') {
+                $publisher_id = $config['auth']['publisher_id'] ?? '';
+                if (empty($publisher_id)) {
+                    return new WP_Error('missing_publisher_id', __('Publisher ID is required', 'job-killer'));
+                }
+                
+                $test_args = array_merge($config['parameters'] ?? array(), array('only_today' => true));
+                $url = $provider_class::build_url($publisher_id, $test_args);
+                $result = $provider_class::fetch($url, $test_args);
+                
+                if (is_wp_error($result)) {
+                    return $result;
+                }
+                
+                return array(
+                    'success' => true,
+                    'message' => sprintf(__('Connection successful! Found %d jobs.', 'job-killer'), count($result)),
+                    'jobs_found' => count($result),
+                    'sample_jobs' => array_slice($result, 0, 3),
+                    'api_url' => self::mask_sensitive_url($url)
+                );
+            }
+            
+            // For other providers, implement similar logic
+            return new WP_Error('provider_not_implemented', __('Provider test not implemented', 'job-killer'));
+            
+        } catch (Exception $e) {
+            return new WP_Error('provider_test_failed', $e->getMessage());
+        }
+    }
+    
+    /**
+     * Mask sensitive information in URL for logging
+     */
+    private static function mask_sensitive_url($url) {
+        $parsed = parse_url($url);
+        if (!isset($parsed['query'])) {
+            return $url;
+        }
+        
+        parse_str($parsed['query'], $params);
+        
+        // Mask sensitive parameters
+        if (isset($params['user_ip'])) {
+            $parts = explode('.', $params['user_ip']);
+            if (count($parts) === 4) {
+                $params['user_ip'] = $parts[0] . '.' . $parts[1] . '.xxx.xxx';
+            }
+        }
+        
+        if (isset($params['user_agent'])) {
+            $params['user_agent'] = substr($params['user_agent'], 0, 20) . '...';
+        }
+        
+        $masked_query = http_build_query($params);
+        return $parsed['scheme'] . '://' . $parsed['host'] . $parsed['path'] . '?' . $masked_query;
+    }
 }
 
 /**

@@ -9,12 +9,23 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Ensure helper is available
+// Ensure helper is available with fallback
 if (!isset($helper) || !$helper) {
-    if (!class_exists('JK_Helper')) {
-        require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-jk-helper.php';
+    if (class_exists('JK_Helper')) {
+        $helper = new JK_Helper();
+    } elseif (class_exists('Job_Killer_Helper')) {
+        $helper = new Job_Killer_Helper();
+    } else {
+        // Create minimal helper for time_ago
+        $helper = new class {
+            public function time_ago($datetime) {
+                if (empty($datetime)) return __('Never', 'job-killer');
+                $timestamp = is_numeric($datetime) ? $datetime : strtotime($datetime);
+                if (!$timestamp) return __('Invalid date', 'job-killer');
+                return human_time_diff($timestamp, current_time('timestamp')) . ' ' . __('ago', 'job-killer');
+            }
+        };
     }
-    $helper = new JK_Helper();
 }
 ?>
 

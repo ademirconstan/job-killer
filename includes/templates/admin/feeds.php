@@ -142,14 +142,20 @@ if (!defined('ABSPATH')) {
 
                 <div class="job-killer-form-group">
                     <label for="feed_url"><?php _e('RSS Feed URL', 'job-killer'); ?></label>
-                    <input type="url" id="feed_url" name="feed[url]" required>
+                    <input type="url" id="feed_url" name="jk_feed_url" required>
                     <p class="description"><?php _e('The complete URL to the RSS feed', 'job-killer'); ?></p>
+                </div>
+                
+                <div class="job-killer-form-group" id="whatjobs-publisher-field" style="display: none;">
+                    <label for="feed_publisher_id"><?php _e('Publisher ID (WhatJobs)', 'job-killer'); ?></label>
+                    <input type="text" id="feed_publisher_id" name="jk_feed_publisher_id">
+                    <p class="description"><?php _e('Required for WhatJobs API access', 'job-killer'); ?></p>
                 </div>
 
                 <div class="job-killer-form-row">
                     <div class="job-killer-form-group">
                         <label for="feed_category"><?php _e('Default Category', 'job-killer'); ?></label>
-                        <select id="feed_category" name="feed[default_category]">
+                        <select id="feed_category" name="jk_feed_category">
                             <option value=""><?php _e('Select Category', 'job-killer'); ?></option>
                             <?php
                             $categories = get_terms(array(
@@ -165,7 +171,7 @@ if (!defined('ABSPATH')) {
 
                     <div class="job-killer-form-group">
                         <label for="feed_region"><?php _e('Default Region', 'job-killer'); ?></label>
-                        <select id="feed_region" name="feed[default_region]">
+                        <select id="feed_region" name="jk_feed_region">
                             <option value=""><?php _e('Select Region', 'job-killer'); ?></option>
                             <?php
                             $regions = get_terms(array(
@@ -182,7 +188,7 @@ if (!defined('ABSPATH')) {
 
                 <div class="job-killer-form-group">
                     <label>
-                        <input type="checkbox" name="feed[active]" value="1" checked>
+                        <input type="checkbox" name="jk_feed_active" value="1" checked>
                         <?php _e('Activate this feed immediately', 'job-killer'); ?>
                     </label>
                 </div>
@@ -195,36 +201,38 @@ if (!defined('ABSPATH')) {
                     <div class="job-killer-form-row">
                         <div class="job-killer-form-group">
                             <label><?php _e('Title Field', 'job-killer'); ?></label>
-                            <input type="text" name="feed[field_mapping][title]" value="title">
+                            <input type="text" name="jk_feed_mapping_title" value="title">
                         </div>
                         <div class="job-killer-form-group">
                             <label><?php _e('Description Field', 'job-killer'); ?></label>
-                            <input type="text" name="feed[field_mapping][description]" value="description">
+                            <input type="text" name="jk_feed_mapping_description" value="description">
                         </div>
                     </div>
 
                     <div class="job-killer-form-row">
                         <div class="job-killer-form-group">
                             <label><?php _e('Company Field', 'job-killer'); ?></label>
-                            <input type="text" name="feed[field_mapping][company]" value="company">
+                            <input type="text" name="jk_feed_mapping_company" value="company">
                         </div>
                         <div class="job-killer-form-group">
                             <label><?php _e('Location Field', 'job-killer'); ?></label>
-                            <input type="text" name="feed[field_mapping][location]" value="location">
+                            <input type="text" name="jk_feed_mapping_location" value="location">
                         </div>
                     </div>
 
                     <div class="job-killer-form-row">
                         <div class="job-killer-form-group">
                             <label><?php _e('URL Field', 'job-killer'); ?></label>
-                            <input type="text" name="feed[field_mapping][url]" value="link">
+                            <input type="text" name="jk_feed_mapping_url" value="link">
                         </div>
                         <div class="job-killer-form-group">
                             <label><?php _e('Date Field', 'job-killer'); ?></label>
-                            <input type="text" name="feed[field_mapping][date]" value="pubDate">
+                            <input type="text" name="jk_feed_mapping_date" value="pubDate">
                         </div>
                     </div>
                 </div>
+                
+                <?php wp_nonce_field('jk_feeds_save', 'jk_feeds_nonce'); ?>
             </form>
         </div>
         <div class="job-killer-modal-footer">
@@ -309,12 +317,25 @@ if (!defined('ABSPATH')) {
 
 <script>
 jQuery(document).ready(function($) {
+    // Show/hide publisher ID field based on URL
+    $('#feed_url').on('input', function() {
+        var url = $(this).val();
+        if (url.indexOf('whatjobs.com') !== -1 || url.indexOf('api.whatjobs.com') !== -1) {
+            $('#whatjobs-publisher-field').show();
+            $('#feed_publisher_id').prop('required', true);
+        } else {
+            $('#whatjobs-publisher-field').hide();
+            $('#feed_publisher_id').prop('required', false);
+        }
+    });
+    
     // Test feed functionality
     $('.job-killer-test-feed').on('click', function(e) {
         e.preventDefault();
         
         var $button = $(this);
         var feedUrl = $button.data('feed-url') || $('#feed_url').val() || $('#edit_feed_url').val();
+        var publisherId = $('#feed_publisher_id').val();
         
         if (!feedUrl) {
             alert('Please enter a feed URL first.');
@@ -323,14 +344,21 @@ jQuery(document).ready(function($) {
         
         $button.prop('disabled', true).html('<span class="job-killer-loading"></span> Testing...');
         
+        var requestData = {
+            action: 'job_killer_test_feed',
+            nonce: jobKillerAdmin.nonce,
+            url: feedUrl
+        };
+        
+        // Add publisher ID if provided (for WhatJobs)
+        if (publisherId) {
+            requestData.publisher_id = publisherId;
+        }
+        
         $.ajax({
             url: jobKillerAdmin.ajaxUrl,
             type: 'POST',
-            data: {
-                action: 'job_killer_test_feed',
-                nonce: jobKillerAdmin.nonce,
-                url: feedUrl
-            },
+            data: requestData,
             success: function(response) {
                 if (response.success) {
                     $('.job-killer-test-results').html(
@@ -338,6 +366,7 @@ jQuery(document).ready(function($) {
                         '<h4>Test Successful!</h4>' +
                         '<p>' + response.data.message + '</p>' +
                         '<p><strong>Provider:</strong> ' + response.data.provider_name + '</p>' +
+                        (response.data.api_url ? '<p><strong>API URL:</strong> <code>' + response.data.api_url + '</code></p>' : '') +
                         '</div>'
                     ).show();
                     

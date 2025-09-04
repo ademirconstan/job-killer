@@ -1,6 +1,6 @@
 <?php
 /**
- * Job Killer Admin Class
+ * Admin Feeds Template
  *
  * @package Job_Killer
  */
@@ -8,435 +8,388 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+?>
 
-/**
- * Handle admin functionality
- */
-class Job_Killer_Admin {
-    
-    /**
-     * Settings instance
-     */
-    public $settings;
-    
-    /**
-     * AJAX instance
-     */
-    public $ajax;
-    
-    /**
-     * Auto feeds instance
-     */
-    public $auto_feeds;
-    
-    /**
-     * Setup instance
-     */
-    public $setup;
-    
-    /**
-     * Helper instance
-     */
-    protected $helper;
-    
-    /**
-     * Constructor
-     */
-    public function __construct() {
-        // Load helper first
-        $this->load_helper();
+<div class="wrap job-killer-admin">
+    <div class="job-killer-header">
+        <h1><?php _e('RSS Feeds Management', 'job-killer'); ?></h1>
+        <button class="job-killer-btn job-killer-btn-primary" data-modal="job-killer-add-feed-modal">
+            <?php _e('Add New Feed', 'job-killer'); ?>
+        </button>
+    </div>
+
+    <!-- Feeds List -->
+    <div class="job-killer-feeds-container">
+        <?php if (!empty($feeds)): ?>
+        <table class="job-killer-feeds-table">
+            <thead>
+                <tr>
+                    <th><?php _e('Name', 'job-killer'); ?></th>
+                    <th><?php _e('URL', 'job-killer'); ?></th>
+                    <th><?php _e('Provider', 'job-killer'); ?></th>
+                    <th><?php _e('Status', 'job-killer'); ?></th>
+                    <th><?php _e('Last Import', 'job-killer'); ?></th>
+                    <th><?php _e('Jobs Imported', 'job-killer'); ?></th>
+                    <th><?php _e('Actions', 'job-killer'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($feeds as $feed_id => $feed): ?>
+                <tr data-feed-id="<?php echo esc_attr($feed_id); ?>">
+                    <td>
+                        <strong><?php echo esc_html($feed['name']); ?></strong>
+                        <?php if (!empty($feed['default_category'])): ?>
+                        <br><small><?php echo esc_html($feed['default_category']); ?></small>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <a href="<?php echo esc_url($feed['url']); ?>" target="_blank" title="<?php echo esc_attr($feed['url']); ?>">
+                            <?php echo esc_html(wp_trim_words($feed['url'], 6, '...')); ?>
+                        </a>
+                    </td>
+                    <td>
+                        <?php
+                        $provider_id = $rss_providers->detect_provider($feed['url']);
+                        $provider_config = $rss_providers->get_provider_config($provider_id);
+                        echo esc_html($provider_config['name']);
+                        ?>
+                    </td>
+                    <td>
+                        <span class="job-killer-feed-status <?php echo !empty($feed['active']) ? 'active' : 'inactive'; ?>">
+                            <?php echo !empty($feed['active']) ? __('Active', 'job-killer') : __('Inactive', 'job-killer'); ?>
+                        </span>
+                    </td>
+                    <td>
+                        <?php
+                        $last_import = get_option('job_killer_last_import_' . $feed_id);
+                        echo $last_import ? $helper->time_ago($last_import) : __('Never', 'job-killer');
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+                        global $wpdb;
+                        $imports_table = $wpdb->prefix . 'job_killer_imports';
+                        $count = $wpdb->get_var($wpdb->prepare(
+                            "SELECT COUNT(*) FROM $imports_table WHERE feed_id = %s",
+                            $feed_id
+                        ));
+                        echo number_format($count);
+                        ?>
+                    </td>
+                    <td>
+                        <div class="job-killer-feed-actions">
+                            <button class="job-killer-btn job-killer-btn-secondary job-killer-test-feed" 
+                                    data-feed-id="<?php echo esc_attr($feed_id); ?>"
+                                    data-feed-url="<?php echo esc_attr($feed['url']); ?>">
+                                <?php _e('Test', 'job-killer'); ?>
+                            </button>
+                            
+                            <button class="job-killer-btn job-killer-btn-success job-killer-import-feed" 
+                                    data-feed-id="<?php echo esc_attr($feed_id); ?>">
+                                <?php _e('Import', 'job-killer'); ?>
+                            </button>
+                            
+                            <button class="job-killer-btn job-killer-btn-secondary job-killer-toggle-feed" 
+                                    data-feed-id="<?php echo esc_attr($feed_id); ?>">
+                                <?php echo !empty($feed['active']) ? __('Deactivate', 'job-killer') : __('Activate', 'job-killer'); ?>
+                            </button>
+                            
+                            <button class="job-killer-btn job-killer-btn-secondary" 
+                                    data-modal="job-killer-edit-feed-modal"
+                                    data-feed-id="<?php echo esc_attr($feed_id); ?>">
+                                <?php _e('Edit', 'job-killer'); ?>
+                            </button>
+                            
+                            <button class="job-killer-btn job-killer-btn-danger job-killer-delete-feed" 
+                                    data-feed-id="<?php echo esc_attr($feed_id); ?>">
+                                <?php _e('Delete', 'job-killer'); ?>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php else: ?>
+        <div class="job-killer-form">
+            <h3><?php _e('No RSS Feeds Configured', 'job-killer'); ?></h3>
+            <p><?php _e('Get started by adding your first RSS feed source.', 'job-killer'); ?></p>
+            <button class="job-killer-btn job-killer-btn-primary" data-modal="job-killer-add-feed-modal">
+                <?php _e('Add Your First Feed', 'job-killer'); ?>
+            </button>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Test Results -->
+    <div class="job-killer-test-results" style="display: none; margin-top: 20px;"></div>
+</div>
+
+<!-- Add Feed Modal -->
+<div id="job-killer-add-feed-modal" class="job-killer-modal">
+    <div class="job-killer-modal-content">
+        <div class="job-killer-modal-header">
+            <h2><?php _e('Add New RSS Feed', 'job-killer'); ?></h2>
+            <button class="job-killer-modal-close">&times;</button>
+        </div>
+        <div class="job-killer-modal-body">
+            <form id="job-killer-add-feed-form">
+                <?php wp_nonce_field('jk_feeds_save', 'jk_feeds_nonce'); ?>
+                
+                <div class="job-killer-form-group">
+                    <label for="jk_feed_name"><?php _e('Feed Name', 'job-killer'); ?></label>
+                    <input type="text" id="jk_feed_name" name="jk_feed_name" class="regular-text" required>
+                    <p class="description"><?php _e('A descriptive name for this feed', 'job-killer'); ?></p>
+                </div>
+
+                <div class="job-killer-form-group">
+                    <label for="jk_feed_url"><?php _e('RSS Feed URL', 'job-killer'); ?></label>
+                    <input type="url" id="jk_feed_url" name="jk_feed_url" class="regular-text" required>
+                    <p class="description"><?php _e('The complete URL to the RSS feed', 'job-killer'); ?></p>
+                </div>
+                
+                <div class="job-killer-form-group" id="whatjobs-auth-fields" style="display: none;">
+                    <label for="jk_publisher_id"><?php _e('Publisher ID (WhatJobs)', 'job-killer'); ?></label>
+                    <input type="text" id="jk_publisher_id" name="jk_publisher_id" class="regular-text">
+                    <p class="description"><?php _e('Required for WhatJobs API access', 'job-killer'); ?></p>
+
+                <div class="job-killer-form-row">
+                    <div class="job-killer-form-group">
+                        <label for="feed_category"><?php _e('Default Category', 'job-killer'); ?></label>
+                        <select id="feed_category" name="feed[default_category]">
+                            <option value=""><?php _e('Select Category', 'job-killer'); ?></option>
+                            <?php
+                            $categories = get_terms(array(
+                                'taxonomy' => 'job_listing_category',
+                                'hide_empty' => false
+                            ));
+                            foreach ($categories as $category) {
+                                echo '<option value="' . esc_attr($category->name) . '">' . esc_html($category->name) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+                    <div class="job-killer-form-group">
+                        <label for="feed_region"><?php _e('Default Region', 'job-killer'); ?></label>
+                        <select id="feed_region" name="feed[default_region]">
+                            <option value=""><?php _e('Select Region', 'job-killer'); ?></option>
+                            <?php
+                            $regions = get_terms(array(
+                                'taxonomy' => 'job_listing_region',
+                                'hide_empty' => false
+                            ));
+                            foreach ($regions as $region) {
+                                echo '<option value="' . esc_attr($region->name) . '">' . esc_html($region->name) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="job-killer-form-group">
+                    <label>
+                        <input type="checkbox" name="feed[active]" value="1" checked>
+                        <?php _e('Activate this feed immediately', 'job-killer'); ?>
+                    </label>
+                </div>
+
+                <!-- Field Mapping Section -->
+                <div class="job-killer-field-mapping" style="display: none;">
+                    <h4><?php _e('Field Mapping', 'job-killer'); ?></h4>
+                    <p class="description"><?php _e('Map RSS fields to job listing fields', 'job-killer'); ?></p>
+                    
+                    <div class="job-killer-form-row">
+                        <div class="job-killer-form-group">
+                            <label><?php _e('Title Field', 'job-killer'); ?></label>
+                            <input type="text" name="feed[field_mapping][title]" value="title">
+                        </div>
+                        <div class="job-killer-form-group">
+                            <label><?php _e('Description Field', 'job-killer'); ?></label>
+                            <input type="text" name="feed[field_mapping][description]" value="description">
+                        </div>
+                    </div>
+
+                    <div class="job-killer-form-row">
+                        <div class="job-killer-form-group">
+                            <label><?php _e('Company Field', 'job-killer'); ?></label>
+                            <input type="text" name="feed[field_mapping][company]" value="company">
+                        </div>
+                        <div class="job-killer-form-group">
+                            <label><?php _e('Location Field', 'job-killer'); ?></label>
+                            <input type="text" name="feed[field_mapping][location]" value="location">
+                        </div>
+                    </div>
+
+                    <div class="job-killer-form-row">
+                        <div class="job-killer-form-group">
+                            <label><?php _e('URL Field', 'job-killer'); ?></label>
+                            <input type="text" name="feed[field_mapping][url]" value="link">
+                        </div>
+                        <div class="job-killer-form-group">
+                            <label><?php _e('Date Field', 'job-killer'); ?></label>
+                            <input type="text" name="feed[field_mapping][date]" value="pubDate">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="job-killer-modal-footer">
+            <button class="job-killer-btn job-killer-btn-secondary job-killer-test-feed">
+                <?php _e('Test Feed', 'job-killer'); ?>
+            </button>
+            <button class="job-killer-btn job-killer-btn-primary job-killer-save-feed">
+                <?php _e('Save Feed', 'job-killer'); ?>
+            </button>
+            <button class="job-killer-btn job-killer-btn-secondary job-killer-modal-close">
+                <?php _e('Cancel', 'job-killer'); ?>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Feed Modal -->
+<div id="job-killer-edit-feed-modal" class="job-killer-modal">
+    <div class="job-killer-modal-content">
+        <div class="job-killer-modal-header">
+            <h2><?php _e('Edit RSS Feed', 'job-killer'); ?></h2>
+            <button class="job-killer-modal-close">&times;</button>
+        </div>
+        <div class="job-killer-modal-body">
+            <form id="job-killer-edit-feed-form">
+                <input type="hidden" name="feed[id]" id="edit_feed_id">
+                <!-- Same form fields as add modal -->
+                <div class="job-killer-form-group">
+                    <label for="edit_feed_name"><?php _e('Feed Name', 'job-killer'); ?></label>
+                    <input type="text" id="edit_feed_name" name="feed[name]" required>
+                </div>
+
+                <div class="job-killer-form-group">
+                    <label for="edit_feed_url"><?php _e('RSS Feed URL', 'job-killer'); ?></label>
+                    <input type="url" id="edit_feed_url" name="feed[url]" required>
+                </div>
+
+                <div class="job-killer-form-row">
+                    <div class="job-killer-form-group">
+                        <label for="edit_feed_category"><?php _e('Default Category', 'job-killer'); ?></label>
+                        <select id="edit_feed_category" name="feed[default_category]">
+                            <option value=""><?php _e('Select Category', 'job-killer'); ?></option>
+                            <?php
+                            foreach ($categories as $category) {
+                                echo '<option value="' . esc_attr($category->name) . '">' . esc_html($category->name) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+                    <div class="job-killer-form-group">
+                        <label for="edit_feed_region"><?php _e('Default Region', 'job-killer'); ?></label>
+                        <select id="edit_feed_region" name="feed[default_region]">
+                            <option value=""><?php _e('Select Region', 'job-killer'); ?></option>
+                            <?php
+                            foreach ($regions as $region) {
+                                echo '<option value="' . esc_attr($region->name) . '">' . esc_html($region->name) . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="job-killer-form-group">
+                    <label>
+                        <input type="checkbox" id="edit_feed_active" name="feed[active]" value="1">
+                        <?php _e('Feed is active', 'job-killer'); ?>
+                    </label>
+                </div>
+            </form>
+        </div>
+        <div class="job-killer-modal-footer">
+            <button class="job-killer-btn job-killer-btn-primary job-killer-save-feed">
+                <?php _e('Update Feed', 'job-killer'); ?>
+            </button>
+            <button class="job-killer-btn job-killer-btn-secondary job-killer-modal-close">
+                <?php _e('Cancel', 'job-killer'); ?>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+jQuery(document).ready(function($) {
+    // Test feed functionality
+    $('.job-killer-test-feed').on('click', function(e) {
+        e.preventDefault();
         
-        $this->init_hooks();
+        var $button = $(this);
+        var feedUrl = $button.data('feed-url') || $('#feed_url').val() || $('#edit_feed_url').val();
         
-        // Load components after admin_init to ensure all dependencies are available
-        add_action('admin_init', array($this, 'load_components'), 5);
-    }
-    
-    /**
-     * Load helper instance
-     */
-    private function load_helper() {
-        if (!class_exists('JK_Helper')) {
-            require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-jk-helper.php';
-        }
-        $this->helper = new JK_Helper();
-    }
-    
-    /**
-     * Initialize hooks
-     */
-    private function init_hooks() {
-        add_action('admin_menu', array($this, 'add_admin_menu'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
-        add_action('admin_init', array($this, 'admin_init'));
-        add_filter('plugin_action_links_' . JOB_KILLER_PLUGIN_BASENAME, array($this, 'add_action_links'));
-    }
-    
-    /**
-     * Load admin components
-     */
-    public function load_components() {
-        // Only load if classes exist
-        if (class_exists('Job_Killer_Admin_Settings')) {
-            $this->settings = new Job_Killer_Admin_Settings();
-        }
-        
-        if (class_exists('Job_Killer_Admin_Ajax')) {
-            $this->ajax = new Job_Killer_Admin_Ajax();
-        }
-        
-        if (class_exists('Job_Killer_Admin_Auto_Feeds')) {
-            $this->auto_feeds = new Job_Killer_Admin_Auto_Feeds();
-        }
-        
-        if (class_exists('Job_Killer_Admin_Setup')) {
-            $this->setup = new Job_Killer_Admin_Setup();
-        }
-    }
-    
-    /**
-     * Add admin menu
-     */
-    public function add_admin_menu() {
-        // Main menu
-        add_menu_page(
-            __('Job Killer', 'job-killer'),
-            __('Job Killer', 'job-killer'),
-            'manage_options',
-            'job-killer',
-            array($this, 'dashboard_page'),
-            'dashicons-businessman',
-            25
-        );
-        
-        // Dashboard
-        add_submenu_page(
-            'job-killer',
-            __('Dashboard', 'job-killer'),
-            __('Dashboard', 'job-killer'),
-            'manage_options',
-            'job-killer',
-            array($this, 'dashboard_page')
-        );
-        
-        // Settings
-        add_submenu_page(
-            'job-killer',
-            __('Settings', 'job-killer'),
-            __('Settings', 'job-killer'),
-            'manage_options',
-            'job-killer-settings',
-            array($this, 'settings_page')
-        );
-        
-        // RSS Feeds
-        add_submenu_page(
-            'job-killer',
-            __('RSS Feeds', 'job-killer'),
-            __('RSS Feeds', 'job-killer'),
-            'manage_options',
-            'job-killer-feeds',
-            array($this, 'feeds_page')
-        );
-        
-        // Auto Feeds
-        add_submenu_page(
-            'job-killer',
-            __('Feeds Automáticos', 'job-killer'),
-            __('Feeds Automáticos', 'job-killer'),
-            'manage_options',
-            'job-killer-auto-feeds',
-            array($this, 'auto_feeds_page')
-        );
-        
-        // API Testing
-        add_submenu_page(
-            'job-killer',
-            __('API Testing', 'job-killer'),
-            __('API Testing', 'job-killer'),
-            'manage_options',
-            'job-killer-api-test',
-            array($this, 'api_test_page')
-        );
-        
-        // Scheduling
-        add_submenu_page(
-            'job-killer',
-            __('Scheduling', 'job-killer'),
-            __('Scheduling', 'job-killer'),
-            'manage_options',
-            'job-killer-scheduling',
-            array($this, 'scheduling_page')
-        );
-        
-        // Logs
-        add_submenu_page(
-            'job-killer',
-            __('Logs', 'job-killer'),
-            __('Logs', 'job-killer'),
-            'manage_options',
-            'job-killer-logs',
-            array($this, 'logs_page')
-        );
-        
-        // Setup wizard (only if not completed)
-        if (!get_option('job_killer_setup_completed')) {
-            add_submenu_page(
-                null, // Hidden from menu
-                __('Setup Wizard', 'job-killer'),
-                __('Setup Wizard', 'job-killer'),
-                'manage_options',
-                'job-killer-setup',
-                array($this, 'setup_page')
-            );
-        }
-    }
-    
-    /**
-     * Enqueue admin scripts
-     */
-    public function enqueue_admin_scripts($hook) {
-        if (strpos($hook, 'job-killer') === false) {
-            return;
-        }
-        
-        // CSS
-        wp_enqueue_style(
-            'job-killer-admin-legacy',
-            JOB_KILLER_PLUGIN_URL . 'includes/admin/assets/css/styles.css',
-            array(),
-            JOB_KILLER_VERSION
-        );
-        
-        // New clean admin CSS
-        wp_enqueue_style(
-            'job-killer-admin',
-            JOB_KILLER_PLUGIN_URL . 'assets/css/admin.css',
-            array(),
-            JOB_KILLER_VERSION
-        );
-        
-        // JavaScript
-        wp_enqueue_script(
-            'job-killer-admin',
-            JOB_KILLER_PLUGIN_URL . 'includes/admin/assets/js/scripts.js',
-            array('jquery', 'wp-util'),
-            JOB_KILLER_VERSION,
-            true
-        );
-        
-        // Chart.js for dashboard
-        if ($hook === 'toplevel_page_job-killer') {
-            wp_enqueue_script(
-                'chart-js',
-                'https://cdn.jsdelivr.net/npm/chart.js',
-                array(),
-                '3.9.1',
-                true
-            );
-        }
-        
-        // Select2 for dropdowns
-        wp_enqueue_script(
-            'select2',
-            'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js',
-            array('jquery'),
-            '4.1.0',
-            true
-        );
-        
-        wp_enqueue_style(
-            'select2',
-            'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css',
-            array(),
-            '4.1.0'
-        );
-        
-        // Localize script
-        wp_localize_script('job-killer-admin', 'jobKillerAdmin', array(
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('job_killer_admin_nonce'),
-            'strings' => array(
-                'confirm_delete' => __('Are you sure you want to delete this item?', 'job-killer'),
-                'testing_feed' => __('Testing feed...', 'job-killer'),
-                'test_successful' => __('Test successful!', 'job-killer'),
-                'test_failed' => __('Test failed!', 'job-killer'),
-                'importing' => __('Importing...', 'job-killer'),
-                'import_complete' => __('Import complete!', 'job-killer'),
-                'error_occurred' => __('An error occurred. Please try again.', 'job-killer')
-            )
-        ));
-    }
-    
-    /**
-     * Admin init
-     */
-    public function admin_init() {
-        // Check if plugin was just activated
-        if (get_option('job_killer_activated')) {
-            delete_option('job_killer_activated');
-            
-            // Only redirect if not doing AJAX and user has permissions
-            if (!wp_doing_ajax() && current_user_can('manage_options')) {
-                wp_redirect(admin_url('admin.php?page=job-killer&welcome=1'));
-                exit;
+        if (!feedUrl) {
+            // Fallback helper
+            if (!class_exists('JK_Helper')) {
+                require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-jk-helper.php';
             }
-        }
-    }
-    
-    /**
-     * Add action links
-     */
-    public function add_action_links($links) {
-        $action_links = array(
-            'settings' => '<a href="' . admin_url('admin.php?page=job-killer-settings') . '">' . __('Settings', 'job-killer') . '</a>',
-            'feeds' => '<a href="' . admin_url('admin.php?page=job-killer-feeds') . '">' . __('RSS Feeds', 'job-killer') . '</a>'
-        );
-        
-        return array_merge($action_links, $links);
-    }
-    
-    /**
-     * Dashboard page
-     */
-    public function dashboard_page() {
-        $helper = $this->helper; // Make available to template
-        
-        $stats = array();
-        $chart_data = array();
-        $recent_logs = array();
-        
-        if ($helper) {
-            $stats = $helper->get_import_stats();
-            $chart_data = $helper->get_chart_data(30);
-            $recent_logs = $helper->get_logs(array('limit' => 10));
+            $helper = new JK_Helper();
         }
         
-        // Get next scheduled import
-        $next_import = wp_next_scheduled('job_killer_import_jobs');
+        $button.prop('disabled', true).html('<span class="job-killer-loading"></span> Testing...');
         
-        // Get feeds status
-        $feeds = get_option('job_killer_feeds', array());
-        $active_feeds = array_filter($feeds, function($feed) {
-            return !empty($feed['active']);
+        $.ajax({
+            url: jobKillerAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'job_killer_test_feed',
+                nonce: jobKillerAdmin.nonce,
+                url: feedUrl
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('.job-killer-test-results').html(
+                        '<div class="job-killer-notice success">' +
+                        '<h4>Test Successful!</h4>' +
+                        '<p>' + response.data.message + '</p>' +
+                        '<p><strong>Provider:</strong> ' + response.data.provider_name + '</p>' +
+                        '</div>'
+                    ).show();
+                    
+                    // Show field mapping section
+                    $('.job-killer-field-mapping').show();
+                } else {
+                    $('.job-killer-test-results').html(
+                        '<div class="job-killer-notice error">' +
+                        '<h4>Test Failed</h4>' +
+                        '<p>' + response.data + '</p>' +
+                        '</div>'
+                    ).show();
+                }
+            },
+            error: function() {
+                $('.job-killer-test-results').html(
+                    '<div class="job-killer-notice error">' +
+                    '<h4>Test Failed</h4>' +
+                    '<p>An error occurred while testing the feed.</p>' +
+                    '</div>'
+                ).show();
+            },
+            complete: function() {
+                $button.prop('disabled', false).html('Test Feed');
+            }
         });
-        
-        include JOB_KILLER_PLUGIN_DIR . 'includes/templates/admin/dashboard.php';
-    }
+    });
     
-    /**
-     * Settings page
-     */
-    public function settings_page() {
-        if ($this->settings && method_exists($this->settings, 'render_page')) {
-            $this->settings->render_page();
-        } else {
-            echo '<div class="notice notice-error"><p>' . __('Settings component not available.', 'job-killer') . '</p></div>';
+    // Edit feed modal
+    $('[data-modal="job-killer-edit-feed-modal"]').on('click', function() {
+        var feedId = $(this).data('feed-id');
+        var feedData = <?php echo wp_json_encode($feeds); ?>;
+        var feed = feedData[feedId];
+        
+        if (feed) {
+            $('#edit_feed_id').val(feedId);
+            $('#edit_feed_name').val(feed.name);
+            $('#edit_feed_url').val(feed.url);
+            $('#edit_feed_category').val(feed.default_category || '');
+            $('#edit_feed_region').val(feed.default_region || '');
+            $('#edit_feed_active').prop('checked', feed.active);
         }
-    }
-    
-    /**
-     * Feeds page
-     */
-    public function feeds_page() {
-        $feeds = get_option('job_killer_feeds', array());
-        
-        $rss_providers = null;
-        $providers = array();
-        
-        if (class_exists('Job_Killer_Rss_Providers')) {
-            $rss_providers = new Job_Killer_Rss_Providers();
-            $providers = $rss_providers->get_providers();
-        }
-        
-        include JOB_KILLER_PLUGIN_DIR . 'includes/templates/admin/feeds.php';
-    }
-    
-    /**
-     * Auto feeds page
-     */
-    public function auto_feeds_page() {
-        if ($this->auto_feeds && method_exists($this->auto_feeds, 'render_page')) {
-            $this->auto_feeds->render_page();
-        } else {
-            echo '<div class="notice notice-error"><p>' . __('Auto feeds component not available.', 'job-killer') . '</p></div>';
-        }
-    }
-    
-    /**
-     * API test page
-     */
-    public function api_test_page() {
-        include JOB_KILLER_PLUGIN_DIR . 'includes/templates/admin/api-test.php';
-    }
-    
-    /**
-     * Setup page
-     */
-    public function setup_page() {
-        if ($this->setup && method_exists($this->setup, 'render_setup_wizard')) {
-            $this->setup->render_setup_wizard();
-        } else {
-            echo '<div class="notice notice-error"><p>' . __('Setup component not available.', 'job-killer') . '</p></div>';
-        }
-    }
-    
-    /**
-     * Scheduling page
-     */
-    public function scheduling_page() {
-        $helper = $this->helper; // Make available to template
-        
-        $settings = get_option('job_killer_settings', array());
-        $next_import = wp_next_scheduled('job_killer_import_jobs');
-        $next_cleanup = wp_next_scheduled('job_killer_cleanup_logs');
-        
-        // Get cron history
-        $cron_logs = array();
-        
-        if ($helper) {
-            $cron_logs = $helper->get_logs(array(
-                'source' => 'cron',
-                'limit' => 20
-            ));
-        }
-        
-        include JOB_KILLER_PLUGIN_DIR . 'includes/templates/admin/scheduling.php';
-    }
-    
-    /**
-     * Logs page
-     */
-    public function logs_page() {
-        $helper = $this->helper; // Make available to template
-        
-        if (!$helper) {
-            echo '<div class="notice notice-error"><p>' . __('Helper component not available.', 'job-killer') . '</p></div>';
-            return;
-        }
-        
-        // Handle filters
-        $filters = array(
-            'type' => sanitize_text_field($_GET['type'] ?? ''),
-            'source' => sanitize_text_field($_GET['source'] ?? ''),
-            'date_from' => sanitize_text_field($_GET['date_from'] ?? ''),
-            'date_to' => sanitize_text_field($_GET['date_to'] ?? ''),
-            'limit' => 50,
-            'offset' => (max(1, intval($_GET['paged'] ?? 1)) - 1) * 50
-        );
-        
-        $logs = $helper->get_logs($filters);
-        $total_logs = $helper->get_log_count($filters);
-        $total_pages = ceil($total_logs / 50);
-        $current_page = max(1, intval($_GET['paged'] ?? 1));
-        
-        // Get log types and sources for filters
-        global $wpdb;
-        $log_table = $wpdb->prefix . 'job_killer_logs';
-        
-        $log_types = $wpdb->get_col("SELECT DISTINCT type FROM $log_table ORDER BY type");
-        $log_sources = $wpdb->get_col("SELECT DISTINCT source FROM $log_table ORDER BY source");
-        
-        include JOB_KILLER_PLUGIN_DIR . 'includes/templates/admin/logs.php';
-    }
-}
+    });
+});
+</script>

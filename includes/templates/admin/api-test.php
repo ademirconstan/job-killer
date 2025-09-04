@@ -80,7 +80,10 @@ if (!defined('ABSPATH')) {
         
         <div class="job-killer-system-info">
             <?php
-            $helper = new Job_Killer_Helper();
+            if (!class_exists('JK_Helper')) {
+                require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-jk-helper.php';
+            }
+            $helper = new JK_Helper();
             $system_info = $helper->get_system_info();
             ?>
             

@@ -317,12 +317,12 @@ class Job_Killer_Core {
      * Run import process
      */
     public function run_import() {
-        // Load new importer
-        if (!class_exists('JK_Importer')) {
-            require_once JOB_KILLER_PLUGIN_DIR . 'includes/import/class-jk-importer.php';
-        }
-        
         try {
+            // Load new importer
+            if (!class_exists('JK_Importer')) {
+                require_once JOB_KILLER_PLUGIN_DIR . 'includes/import/class-jk-importer.php';
+            }
+            
             $importer = new JK_Importer();
             $importer->run_scheduled_import();
         } catch (Exception $e) {
@@ -336,12 +336,18 @@ class Job_Killer_Core {
      * Cleanup old logs
      */
     public function cleanup_logs() {
-        if (!class_exists('JK_Helper')) {
-            require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-jk-helper.php';
+        try {
+            if (!class_exists('JK_Helper')) {
+                require_once JOB_KILLER_PLUGIN_DIR . 'includes/class-jk-helper.php';
+            }
+            
+            $helper = new JK_Helper();
+            $helper->cleanup_old_logs();
+        } catch (Exception $e) {
+            jk_log('cleanup_logs_error', array(
+                'error' => $e->getMessage()
+            ));
         }
-        
-        $helper = new JK_Helper();
-        $helper->cleanup_old_logs();
     }
     
     /**

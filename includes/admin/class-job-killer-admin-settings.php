@@ -163,18 +163,6 @@ class Job_Killer_Admin_Settings {
                     )
                 )
             ),
-            'seo' => array(
-                'title' => __('SEO Settings', 'job-killer'),
-                'description' => __('Configure SEO and structured data options.', 'job-killer'),
-                'fields' => array(
-                    'structured_data' => array(
-                        'title' => __('Enable Structured Data', 'job-killer'),
-                        'type' => 'checkbox',
-                        'description' => __('Add JSON-LD structured data for better search engine visibility.', 'job-killer'),
-                        'default' => true
-                    )
-                )
-            ),
             'import_behavior' => array(
                 'title' => __('Import Behavior', 'job-killer'),
                 'description' => __('Configure how imported jobs are handled.', 'job-killer'),
@@ -188,6 +176,18 @@ class Job_Killer_Admin_Settings {
                             'draft' => __('Draft (Review before publishing)', 'job-killer'),
                             'publish' => __('Published (Live immediately)', 'job-killer')
                         )
+                    )
+                )
+            ),
+            'seo' => array(
+                'title' => __('SEO Settings', 'job-killer'),
+                'description' => __('Configure SEO and structured data options.', 'job-killer'),
+                'fields' => array(
+                    'structured_data' => array(
+                        'title' => __('Enable Structured Data', 'job-killer'),
+                        'type' => 'checkbox',
+                        'description' => __('Add JSON-LD structured data for better search engine visibility.', 'job-killer'),
+                        'default' => true
                     )
                 )
             )

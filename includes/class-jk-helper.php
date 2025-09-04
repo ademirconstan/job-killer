@@ -280,6 +280,71 @@ class JK_Helper {
         
         return $deleted;
     }
+    
+    /**
+     * Get system information
+     */
+    public function get_system_info() {
+        global $wpdb;
+        
+        return array(
+            'wordpress_version' => get_bloginfo('version'),
+            'php_version' => PHP_VERSION,
+            'plugin_version' => JOB_KILLER_VERSION,
+            'mysql_version' => $wpdb->db_version(),
+            'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
+            'max_execution_time' => ini_get('max_execution_time'),
+            'memory_limit' => ini_get('memory_limit'),
+            'upload_max_filesize' => ini_get('upload_max_filesize'),
+            'curl_version' => function_exists('curl_version') ? curl_version()['version'] : 'Not available',
+            'extensions' => array(
+                'curl' => extension_loaded('curl'),
+                'json' => extension_loaded('json'),
+                'libxml' => extension_loaded('libxml'),
+                'simplexml' => extension_loaded('simplexml'),
+                'dom' => extension_loaded('dom')
+            )
+        );
+    }
+    
+    /**
+     * Export logs to CSV
+     */
+    public function export_logs_csv($filters = array()) {
+        $logs = $this->get_logs(array_merge($filters, array('limit' => 10000)));
+        
+        if (empty($logs)) {
+            return false;
+        }
+        
+        $upload_dir = wp_upload_dir();
+        $filename = 'job-killer-logs-' . date('Y-m-d-H-i-s') . '.csv';
+        $filepath = $upload_dir['path'] . '/' . $filename;
+        
+        $file = fopen($filepath, 'w');
+        
+        // CSV headers
+        fputcsv($file, array('ID', 'Type', 'Source', 'Message', 'Data', 'Created At'));
+        
+        // CSV data
+        foreach ($logs as $log) {
+            fputcsv($file, array(
+                $log->id,
+                $log->type,
+                $log->source,
+                $log->message,
+                $log->data,
+                $log->created_at
+            ));
+        }
+        
+        fclose($file);
+        
+        return array(
+            'url' => $upload_dir['url'] . '/' . $filename,
+            'filename' => $filename
+        );
+    }
 }
 
 /**
